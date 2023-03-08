@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工作区</title>
+    <!-- 外部引用 -->
+    <script src="js\vue.js"></script>
+    <script src="js\jquery.js"></script>
+    <script src="js/customFunc.js"></script>
+</head>
+
+<body>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .head {
+            position: absolute;
+            z-index: 10;
+            height: 20px;
+            width: 100vw;
+            border-bottom: solid 0.5px rgb(200, 200, 200);
+            box-shadow: 0 1px 2px rgb(200, 200, 200);
+            background-color: rgb(207, 255, 175);
+            display: flex;
+            flex-direction: row;
+        }
+
+        .commendbtn {
+            width: 50px;
+            height: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            color: rgb(50, 50, 50);
+            margin-left: 4px;
+        }
+
+        .commendbtn:active {
+            background-color: rgb(175, 218, 146);
+        }
+
+        .menu {
+            z-index: 999;
+            width: 120px;
+            background-color: rgba(220, 220, 220, 0.7);
+            position: absolute;
+            top: 20px;
+            border-right: solid rgb(167, 167, 167) 2px;
+            border-bottom: solid rgb(167, 167, 167) 2px;
+            border-left: solid rgb(167, 167, 167) 2px;
+            box-shadow: 1px 1px 3px #7c7c7c;
+            border-radius: 0 0 3px 3px;
+        }
+
+        .subbtn {
+            margin-left: 5px;
+            margin-right: 5px;
+            font-size: 14px;
+            font-family: 宋体;
+            margin-top: 4px;
+        }
+    </style>
+    <div class="head" id="head">
+        <div id="filebtn" class="commendbtn" @click="openmenu">file</div>
+        <div id="settingbtn" class="commendbtn" @click="openmenu">setting</div>
+        <div id="helpbtn" class="commendbtn" @click="openmenu">help</div>
+        <div id="morebtn" class="commendbtn" @click="openmenu">more</div>
+        <div id="filemenu" class="menu" style="left:-1px" v-show="isFileMenuFold" @mouseover="stoptimer"
+            @mouseleave="continuetimer">
+            <div id="export" class="subbtn" style="border-bottom: solid #aaaaaa 0.5px;">导出为...</div>
+            <div id="createbyconfig" class="subbtn" style="border-bottom: solid #aaaaaa 0.5px;">创建预设画布</div>
+            <div id="create" class="subbtn">创建画布</div>
+        </div>
+        <div id="settingmenu" class="menu" style="left:58px" v-show="isSettingMenuFold" @mouseover="stoptimer"
+            @mouseleave="continuetimer">
+            <div id="config" class="subbtn">预设设置</div>
+        </div>
+        <div id="helpmenu" class="menu" style="left:112px" v-show="isHelpMenuFold" @mouseover="stoptimer"
+            @mouseleave="continuetimer">
+            <div id="md" class="subbtn">说明文档</div>
+        </div>
+        <div id="moremenu" class="menu" style="left:166px" v-show="isMoreMenuFold" @mouseover="stoptimer"
+            @mouseleave="continuetimer">
+            <div id="feedback" class="subbtn">bug提交</div>
+        </div>
+    </div>
+    <script>
+        var timer;
+        var v = new Vue({
+            el: "#head",
+            data: {
+                isFileMenuFold: false,
+                isSettingMenuFold: false,
+                isHelpMenuFold: false,
+                isMoreMenuFold: false,
+            },
+            methods: {
+                //控制顶部菜单栏的开启和关闭
+                openmenu: function (e) {
+                    let target = e.path[0];
+                    var _this = this;
+                    if (target.id == "filebtn") {
+                        if (this.isFileMenuFold == false) {
+                            this.isFileMenuFold = true;
+                            this.isSettingMenuFold = false;
+                            this.isHelpMenuFold = false;
+                            this.isMoreMenuFold = false;
+                            timer = new MysetTimeout(function () { _this.isFileMenuFold = false }, 2000);
+                        } else {
+                            this.isFileMenuFold = false;
+                        }
+                    } else if (target.id == "settingbtn") {
+                        if (this.isSettingMenuFold == false) {
+                            this.isFileMenuFold = false;
+                            this.isSettingMenuFold = true;
+                            this.isHelpMenuFold = false;
+                            this.isMoreMenuFold = false;
+                            timer = new MysetTimeout(function () { _this.isSettingMenuFold = false }, 2000);
+                        } else {
+                            this.isSettingMenuFold = false;
+                        }
+                    } else if (target.id == "helpbtn") {
+                        if (this.isHelpMenuFold == false) {
+                            this.isFileMenuFold = false;
+                            this.isSettingMenuFold = false;
+                            this.isHelpMenuFold = true;
+                            this.isMoreMenuFold = false;
+                            timer = new MysetTimeout(function () { _this.isHelpMenuFold = false }, 2000);
+                        } else {
+                            this.isHelpMenuFold = false;
+                        }
+                    } else if (target.id == "morebtn") {
+                        if (this.isMoreMenuFold == false) {
+                            this.isFileMenuFold = false;
+                            this.isSettingMenuFold = false;
+                            this.isHelpMenuFold = false;
+                            this.isMoreMenuFold = true;
+                            timer = new MysetTimeout(function () { _this.isMoreMenuFold = false }, 2000);
+                        } else {
+                            this.isMoreMenuFold = false;
+                        }
+                    }
+                },
+
+                stoptimer: function (e) {
+                    var target = e.target;
+                    timer.pause();
+                },
+
+                continuetimer: function (e) {
+                    var target = e.target;
+                    timer.play();
+                }
+            }
+        })
+    </script>
+
+    <!-- 工具栏 -->
+    <style>
+        #tools {
+            position: absolute;
+            z-index: 2;
+            top: 21px;
+            width: 100vw;
+            height: 30px;
+            background-color: #f8f8f8;
+            border-bottom: solid 0.5px #cccccc;
+            display: flex;
+        }
+
+        .tool {
+            /* cursor: pointer; */
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            font-size: 14px;
+            font-family: 宋体;
+            margin-left: 7px;
+        }
+
+        .tool:active {
+            background-color: #cccccc;
+        }
+    </style>
+    <div id="tools">
+        <div id="pointer" class="tool" onclick="toPointer(this)">点选</div>
+        <div id="rectangle" class="tool" onclick="toPointer(this)">矩形</div>
+        <div id="line" class="tool" onclick="toPointer(this)">直线</div>
+        <div id="img" class="tool" onclick="toPointer(this)">图片</div>
+        <div id="customborder" class="tool" style="width: 90px;" onclick="toPointer(this)">自定义形状</div>
+    </div>
+    <script>
+        var mode = "choose";
+        var brush;
+        //转换到鼠标点击拖拽模式
+        function toPointer(e) {
+            var workspace = document.getElementById("canvas");
+
+            //改变鼠标指针
+            if (e.id == "pointer") { //切换到点选模式
+                workspace.style.cursor = "default";
+                mode = "choose";
+            } else { //切换到绘制模式
+                workspace.style.cursor = "crosshair";
+                mode = "paint";
+                if (e.id == "rectangle")
+                    brush = "rectangle";
+                else if (e.id = "line")
+                    brush = "line";
+                else if (e.id = "img")
+                    brush = "img"
+                else {
+                    //选择自定义笔刷
+                }
+            }
+        }
+    </script>
+
+    <style>
+        #Hierarchytree {
+            height: calc(100vh - 54px);
+            width: 170px;
+            /* background-color: antiquewhite; */
+            display: flex;
+            flex-direction: column;
+            overflow: scroll;
+        }
+
+        .leaf {
+            width: 170px;
+            height: 25px;
+            margin-top: 3px;
+            box-shadow: 0 1px 1px #bbbbbb;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-family: 宋体;
+            color: #666666;
+            position: relative;
+        }
+
+        .zModifier {
+            height: 25px;
+            width: 10px;
+            font-size: 12px;
+        }
+
+        .upButton {
+            position: absolute;
+            top: -1px;
+            user-select: none;
+            width: 10px;
+            height: 10px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(180deg);
+        }
+
+        .upButton:active {
+            background-color: #666666;
+        }
+
+        .reduceButton {
+            width: 11px;
+            height: 10px;
+            position: absolute;
+            top: 10px;
+            left: 0px;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reduceButton:active {
+            background-color: #666666;
+        }
+
+        #workspace {
+            position: absolute;
+            top: 51px;
+            height: calc(100vh - 54px);
+            width: 100vw;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+
+        #canvas {
+            position: absolute;
+            left: 170px;
+            height: calc(100vh - 54px);
+            width: calc(100vw - 400px);
+            background-color: #f8f8f8;
+            overflow: hidden;
+        }
+
+        #sidebarheader {
+            width: 170px;
+            height: 20px;
+            background-color: #f4f4f4;
+            border-bottom: #cccccc solid 1px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        #sidebarheader p {
+            margin-top: 5px;
+            font-size: 15px;
+            font-family: 宋体;
+        }
+
+        #editfield {
+            width: 230px;
+            height: calc(100vh - 54px);
+            position: absolute;
+            right: 0px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #showname {
+            width: 230px;
+            height: 30px;
+            border-bottom: double #888888 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 宋体;
+        }
+
+        #positionAndSize {
+            border: solid #888888 0.5px;
+            border-radius: 5px;
+            width: 220px;
+            height: 80px;
+            margin-top: 10px;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-around;
+            font-size: 14px;
+            font-family: 宋体;
+        }
+
+        .PnZrow {
+            font-size: 12px;
+            width: 100px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .PnZtext {
+            width: 50px;
+            height: 20px;
+            resize: none;
+            overflow: hidden;
+        }
+
+        #bgcolor {
+            width: 220px;
+            height: 130px;
+            margin-top: 20px;
+            font-size: 14px;
+            font-family: 宋体;
+            border-bottom: #888888 1px solid;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #BGCsingle {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 30px;
+            margin-top: 5px;
+        }
+
+        #BGCmulti {
+            width: 100%;
+            height: auto;
+            margin-top: 5px;
+        }
+
+        .BGCtext {
+            width: 130px;
+            height: 20px;
+            resize: none;
+            overflow: hidden;
+        }
+
+        .BGCrtext {
+            width: 40px;
+            height: 20px;
+            resize: none;
+            overflow: hidden;
+            margin-left: 5px;
+        }
+
+        .palette {
+            width: 20px;
+            height: 20px;
+            border: solid #888888 0.5px;
+            margin-right: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #border-style {
+            margin-top: 10px;
+            width: 220px;
+            height: 90px;
+            border-bottom: solid #888888 1px;
+        }
+
+        #BColortext {
+            width: 60px;
+            height: 20px;
+            resize: none;
+            overflow: hidden;
+        }
+
+        .editIcon {
+            width: 20px;
+            height: 15px;
+            margin-left: 5px;
+            /* margin-right: 5px; */
+            position: relative;
+            top: 4px;
+        }
+
+        .choose-style {
+            height: 20px;
+            width: 120px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: end;
+        }
+
+        .borderWnR {
+            font-size: 12px;
+            font-family: 宋体;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .borderWnRtext {
+            width: 45px;
+            height: 20px;
+            resize: none;
+            overflow: hidden;
+        }
+
+        .sliderIcon {
+            width: 20px;
+            height: 20px;
+            cursor: col-resize;
+        }
+    </style>
+    <div id="workspace">
+        <!-- 左侧边栏，记录组件层次(树状)并支持修改层次的操作 -->
+        <div id="Hierarchytree">
+            <div id="sidebarheader">
+                <p>层级</p>
+                <p>名称</p>
+                <p>z轴</p>
+            </div>
+        </div>
+
+        <!-- 画布 -->
+        <div id="canvas" onmousedown="down(event)" onmouseup="up(event)" onclick="choose(event)">
+        </div>
+
+        <!-- 属性编辑区 -->
+        <div id="editfield">
+            <!-- 名称 -->
+            <div id="showname">
+                <b>
+                    <p>{{target.name}}</p>
+                </b>
+            </div>
+
+            <!-- 位置和大小 -->
+            <div id="positionAndSize">
+                <div class="PnZrow"><span>x:</span><textarea id="PnZx" v-model="target.left" @change="PnZchange($event)"
+                        wrap="off" class="PnZtext">{{target.left}}</textarea></div>
+
+                <div class="PnZrow"><span>y:</span><textarea id="PnZy" v-model="target.top" @change="PnZchange($event)"
+                        wrap=" off" class="PnZtext">{{target.top}}</textarea></div>
+
+                <div class="PnZrow"><span>width:</span><textarea id="PnZw" v-model="target.width"
+                        @change="PnZchange($event)" wrap=" off" class="PnZtext">{{target.width}}</textarea>
+                </div>
+
+                <div class="PnZrow"><span>height:</span><textarea id="PnZh" v-model="target.height"
+                        @change="PnZchange($event)" wrap=" off" class="PnZtext">{{target.height}}</textarea>
+                </div>
+            </div>
+
+            <!-- 背景颜色 -->
+            <div id="bgcolor">
+                <span><b>背景颜色</b></span>
+                <div id="BGCsingle">
+                    <span>单色：</span>
+                    <div class="palette" :style="{backgroundColor:target.backgroundColor}"></div>
+                    <textarea wrap="off" v-model="target.backgroundColor" @change="BGCSchange($event)"
+                        class="BGCtext">{{target.backgroundColor}}</textarea>
+                </div>
+                <div id="BGCmulti">
+                    <span>双色渐变:</span>
+                    <div style="margin-top: 5px;">
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom: 5px;">
+                            <div class="palette" :style="{backgroundColor:target.backgroundColor}"></div>
+                            <textarea wrap="off" id="" class="BGCtext"
+                                @change="BGCMchange($event)">{{target.backgroundColor}}</textarea>
+                            <textarea wrap="off" class="BGCrtext">100%</textarea>
+                        </div>
+                        <div style="display: flex;flex-direction: row;flex-wrap: wrap;">
+                            <div class="palette"></div>
+                            <textarea wrap="off" id="" class="BGCtext" @change="BGCMchange($event)"></textarea>
+                            <textarea wrap="off" class="BGCrtext">0</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 边框样式 -->
+            <div id="border-style">
+                <span style="font-size: 14px;font-family: 宋体;"><b>边框样式</b></span>
+                <div
+                    style="display: flex;flex-direction: row;align-items: center;justify-content: space-around;margin-top: 5px;">
+                    <div class="palette" :style="{backgroundColor:target.borderColor}"></div>
+                    <textarea wrap="off" id="BColortext" @change="bordercolorchange($event)"
+                        v-model="target.borderColor"></textarea>
+                    <div id="choose-style">
+                        <img class="editIcon" src="./res/边框样式.png" alt="style">
+                        <select style="width: 90px;height:21px;" id="stylelist" @change="borderStyleChange($event)"
+                            v-model="target.borderStyle">
+                            <option value="none">无</option>
+                            <option value="hidden">隐藏</option>
+                            <option value="dotted">点状虚线</option>
+                            <option value="dashed">虚线</option>
+                            <option value="solid">实线</option>
+                            <option value="double">双实线</option>
+                            <option value="groove">3D凹槽边框</option>
+                            <option value="ridge">3D垄状边框</option>
+                            <option value="inset">3D嵌入边框</option>
+                            <option value="outset">3D突出边框</option>
+                            <option value="inherit">继承父级</option>
+                        </select>
+                    </div>
+                </div>
+                <div
+                    style="margin-top: 10px;display: flex;flex-direction: row;justify-content: space-around;align-items: center;">
+                    <div class="borderWnR" id="border-width-edit">
+                        <div style="width: 30px;">边框宽度</div>
+                        <textarea wrap="off" @change="borderWnRChange($event)" v-model="target.borderWidth"
+                            class="borderWnRtext"></textarea>
+                        <img class="sliderIcon" @mousedown="handleColResize($event)" src="./res/line-drag move.png"
+                            alt="slider">
+                    </div>
+                    <div class="borderWnR" id="border-radius-edit">
+                        <div style="width: 30px;">边框曲率</div>
+                        <textarea wrap="off" @change="borderWnRChange($event)" v-model="target.borderRadius"
+                            class="borderWnRtext"></textarea>
+                        <img class="sliderIcon" @mousedown="handleColResize($event)" src="./res/line-drag move.png"
+                            alt="slider">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        var workspace = document.getElementById("canvas");
+        var preX; //按下鼠标左键时的位置
+        var preY;
+        var edX; //放开左键时的位置
+        var edY;
+        var elNum = 0;
+        var layerNum = 0;
+        var drawclock = true; //绘制锁，防止当标出界后重置onmosedown同时绘制两个图形
+        var ismoving = false; //判断是否正在拖动元素
+        var mother; //新元素创建在落笔点元素的子节点
+        var sidebar = document.getElementById('Hierarchytree'); //侧边栏dom元素
+        var currentComp; //当前被选中的元素在relationtree中的值
+        var currentCompId; //当前被选中元素的ID
+        var currentCompList = []; //当前被选中多个元素的列表
+        var isRightClick = true; //判断右键是点击还是拖动
+        var relationtree = {}; //组件字典
+
+        //建立右键菜单，隐藏在屏幕之外
+        let RightClickMenu = document.createElement("div");
+        RightClickMenu.id = "rightclickmenu";
+        RightClickMenu.style.width = "80px";
+        RightClickMenu.style.height = "100px";
+        RightClickMenu.style.top = "100px";
+        RightClickMenu.style.left = "80px";
+        RightClickMenu.style.zIndex = 99;
+        RightClickMenu.style.border = "1px";
+        RightClickMenu.style.borderStyle = "solid";
+        RightClickMenu.style.borderColor = '#666666';
+        RightClickMenu.style.backgroundColor = '#ffffff';
+        RightClickMenu.style.display = "none";
+        let deleteButton = document.createElement('div');
+        deleteButton.id = "menudelete";
+        deleteButton.style.width = '80px';
+        deleteButton.style.height = "20px";
+        deleteButton.style.display = "flex";
+        deleteButton.style.alignItems = "center";
+        deleteButton.style.justifyContent = "center";
+        deleteButton.innerHTML = "<p style='font-size:14px;'>删除</p>"
+        deleteButton.style.border = "0px";
+        deleteButton.style.borderBottom = "1px";
+        deleteButton.style.borderColor = "#666666"
+        deleteButton.style.borderStyle = "solid";
+        RightClickMenu.appendChild(deleteButton);
+        workspace.appendChild(RightClickMenu);
+
+        var edt = new Vue({
+            el: "#editfield",
+            data: {
+                target: {
+                    name: '名称',
+                    id: "component0",
+                    left: '0px',
+                    top: '0px',
+                    width: '0px',
+                    height: '0px',
+                    backgroundColor: '#846535',
+                    borderColor: '#000000',
+                    borderStyle: "solid",
+                    borderWidth: '1px',
+                    borderRadius: '0px',
+                },
+            },
+            // mounted: {
+            //     //
+            // },
+            methods: {
+                //用户修改元素的left、top、width、height属性
+                PnZchange: function (event) {
+                    if (event.target.id == "PnZx") {
+                        //判断结尾的px是否被用户改动
+                        if (event.target.value.slice(-2,) != "px") {
+                            event.target.value = event.target.value + 'px'
+                        }
+                        window["Div" + this.target.id.slice(9,)].style.left = event.target.value
+                        relationtree["Div" + this.target.id.slice(9,)].left = event.target.value
+                        // let retarget = JSON.parse(JSON.stringify(this.target))
+                        // retarget.left = event.target.value;
+                        // this.target = retarget;
+                    } else if (event.target.id == "PnZy") {
+                        if (event.target.value.slice(-2,) != "px") {
+                            event.target.value = event.target.value + 'px'
+                        }
+                        window["Div" + this.target.id.slice(9,)].style.top = event.target.value
+                        relationtree["Div" + this.target.id.slice(9,)].top = event.target.value
+                    } else if (event.target.id == "PnZw") {
+                        if (event.target.value.slice(-2,) != "px") {
+                            event.target.value = event.target.value + 'px'
+                        }
+                        window["Div" + this.target.id.slice(9,)].style.width = event.target.value
+                        relationtree["Div" + this.target.id.slice(9,)].width = event.target.value
+                    } else {
+                        if (event.target.value.slice(-2,) != "px") {
+                            event.target.value = event.target.value + 'px'
+                        }
+                        window["Div" + this.target.id.slice(9,)].style.height = event.target.value
+                        relationtree["Div" + this.target.id.slice(9,)].height = event.target.value
+                    }
+                },
+
+                //用户修改元素背景颜色（单色）
+                BGCSchange: function (e) {
+                    let BGCs = document.getElementById('BGCsingle');
+                    let palette = BGCs.children[1];
+                    window["Div" + this.target.id.slice(9,)].style.backgroundColor = e.target.value;
+                    palette.style.backgroundColor = e.target.value;
+                },
+
+                //通过输入框修改边框样式
+                borderStyleChange: function (e) {
+                    window["Div" + this.target.id.slice(9,)].style.borderStyle = e.target.value;
+                    relationtree["Div" + this.target.id.slice(9,)].borderStyle = e.target.value;
+                },
+
+
+                //通过输入框修改边框颜色
+                bordercolorchange: function (e) {
+                    window["Div" + this.target.id.slice(9,)].style.borderColor = e.target.value;
+                    relationtree["Div" + this.target.id.slice(9,)].borderColor = e.target.value;
+                },
+
+                //通过输入框修改边框width和radius
+                borderWnRChange: function (e) {
+                    if (e.target.parentElement.id == "border-width-edit") {
+                        window["Div" + this.target.id.slice(9,)].style.borderWidth = e.target.value;
+                        relationtree["Div" + this.target.id.slice(9,)].borderWidth = e.target.value;
+                    } else {
+                        window["Div" + this.target.id.slice(9,)].style.borderRadius = e.target.value;
+                        relationtree["Div" + this.target.id.slice(9,)].borderRadius = e.target.value;
+                    }
+                },
+
+                //通过滑块修改边框width和radius
+                handleColResize: function (e) {
+                    e.preventDefault();
+                    let that = this;
+                    if ("border-width-edit" == e.target.parentElement.id) {
+                        //修改宽度
+                        let actionArea = document.getElementById("workspace");
+                        actionArea.onmousemove = function (e) {
+                            // console.log(e.movementY);
+                            let currentwidth = parseInt(that.target.borderWidth.slice(0, -2));
+                            if (currentwidth - e.movementY > 0) {
+                                that.target.borderWidth = parseInt(that.target.borderWidth.slice(0, -2)) - e.movementY + "px"
+                                window["Div" + that.target.id.slice(9,)].style.borderWidth = currentwidth - e.movementY + 'px';
+                                relationtree["Div" + that.target.id.slice(9,)].borderWidth = currentwidth - e.movementY + 'px';
+                            }
+                        }
+
+                        actionArea.onmouseup = function () {
+                            actionArea.onmousemove = null;
+                        }
+
+                    } else {
+                        //修改曲率
+                        let actionArea = document.getElementById("workspace");
+                        actionArea.onmousemove = function (e) {
+                            console.log(e.movementX);
+                            let currentradius = parseInt(that.target.borderRadius.slice(0, -2));
+                            if (currentradius - e.movementY > 0) {
+                                that.target.borderRadius = parseInt(that.target.borderRadius.slice(0, -2)) - e.movementY + "px"
+                                window["Div" + that.target.id.slice(9,)].style.borderRadius = currentradius - e.movementY + 'px';
+                                relationtree["Div" + that.target.id.slice(9,)].borderRadius = currentradius - e.movementY + 'px';
+                            }
+                        }
+
+                        actionArea.onmouseup = function () {
+                            actionArea.onmousemove = null;
+                        }
+                    }
+                },
+
+            },
+        })
+        //获取对象最后一项 relationtree[Object.keys(relationtree)[Object.keys(relationtree).length - 1]]
+
+        //初始化侧边栏标签树和绘图区，根据relationtree构建图形
+        /*  
+                for (var item in relationtree) {
+                    elNum++;
+                    window[item] = document.createElement('div');
+                    window[item].id = relationtree[item].id;
+                    window[item].name = relationtree[item].name;
+                    window[item].classList.add("leaf");
+                    window[item].style.display = "flex";
+                    let level = document.createElement("div");
+                    level.style.height = '10px';
+                    level.style.width = '10px';
+                    level.style.borderRadius = '5px';
+                    level.style.borderStyle = 'solid';
+                    level.style.border = '1px';
+                    level.innerHTML = "<p style='margin-left:" + relationtree[item].level * 10 + "px;'>" + relationtree[item].level + "</p>";
+                    window[item].appendChild(level);
+                    window[item].innerHTML = window[item].innerHTML + "<p style='margin-left:20px'>" + relationtree[item].name + "<p>";
+                    sidebar.appendChild(window[item]);
+                    //
+                    // console.log(item, relationtree[item]);
+                    for (var child in relationtree[item].child) {
+                        elNum++;
+                        window[item] = document.createElement('div');
+                        window[item].id = relationtree[item].id;
+                        window[item].name = relationtree[item].name;
+                        window[item].classList.add("leaf");
+                        window[item].style.display = "flex";
+                        let level = document.createElement("div");
+                        level.style.height = '10px';
+                        level.style.width = '10px';
+                        level.style.borderRadius = '5px';
+                        level.style.borderStyle = 'solid';
+                        level.style.border = '1px';
+                        level.innerHTML = "<p style='margin-left:" + relationtree[item].child[child].level * 10 + "px;'>" + relationtree[item].child[child].level + "</p>";
+                        window[item].appendChild(level);
+                        window[item].innerHTML = window[item].innerHTML + "<p style='margin-left:" + (relationtree[item].child[child].level * 10 + 10) + "px'>" + relationtree[item].child[child].name + "<p>";
+                        sidebar.appendChild(window[item]);
+                        //
+                        // console.log(child, relationtree[item].child[child]);
+                    }
+                } */
+
+        //阻止整个页面范围内右键唤起浏览器自带菜单
+        window.oncontextmenu = function (e) {
+            e.preventDefault();
+        }
+
+        function choose(e) {
+            if (mode == "choose") {//点选组件
+                if (e.target.id != "canvas" && currentCompId != e.target.id) {
+                    currentCompId = e.target.id;
+                    currentComp = relationtree["Div" + e.target.id.slice(9,)]
+                    edt.target = currentComp;
+                }
+            }
+        }
+
+        function rightButtonMove(e) { //右键拖动
+            isRightClick = false;
+            console.log(e);
+        }
+
+        function down(event) {
+            //左键绘制
+            if (event.button == 0 && drawclock) {
+                if (mode == "choose") {
+                    //点选模式
+
+                    //单元素选中
+                    if (currentCompList.length == 0 && event.target.id == currentCompId) {
+                        //如果按下鼠标左键时鼠标位于当前选中元素上方，进行拖拽处理
+                        ismoving = true;
+                        let target = event.target;
+                        workspace.onmousemove = function (e) {
+                            //实现拖动
+                            target.style.top = parseInt(target.style.top.slice(0, -2)) + e.movementY + "px";
+                            target.style.left = parseInt(target.style.left.slice(0, -2)) + e.movementX + "px";
+                            //实时识别位置，绘制辅助线
+                            //
+                        }
+                    } else {
+                        //如果按下鼠标左键时鼠位于非选中元素上，进行框选(先不急着写)
+                    }
+
+                } else {
+                    //绘制模式
+                    mother = event.target;
+                    // console.log(event);
+                    //记录按下时位置
+                    preX = event.pageX - 170;
+                    preY = event.pageY - 51;
+                    //构建参考框
+                    if (brush == "rectangle") {
+                        elNum++;
+                        window['Div' + elNum] = document.createElement("div");
+                        window['Div' + elNum].id = "component" + elNum;
+                        window['Div' + elNum].name = "组件" + elNum;
+                        window['Div' + elNum].style.width = "1px";
+                        window['Div' + elNum].style.height = "1px";
+                        window['Div' + elNum].style.position = "absolute";
+                        window['Div' + elNum].style.border = "1px";
+                        window['Div' + elNum].style.left = preX + "px";
+                        window['Div' + elNum].style.top = preY + "px";
+                        window['Div' + elNum].style.borderStyle = "dashed";
+                        window['Div' + elNum].style.overflow = "hidden";
+                        window['Div' + elNum].style.backgroundColor = "#ffffff";
+                        window['Div' + elNum].style.zIndex = 99;
+                        workspace.appendChild(window['Div' + elNum]);
+                    } else if (brush == "line") {
+                        elNum++;
+                        window['Div' + elNum] = document.createElement('div');
+                        window['Div' + elNum].id = "component" + elNum;
+                        window['Div' + elNum].name = "直线" + elNum;
+                        window['Div' + elNum].style.width = "1px";
+                        window['Div' + elNum].style.height = "0px";
+                        window['Div' + elNum].style.position = "absolute";
+                        window['Div' + elNum].style.border = "0px";
+                        window['Div' + elNum].style.borderBottom = "1px";
+                        window['Div' + elNum].style.left = preX + "px";
+                        window['Div' + elNum].style.top = preY + "px";
+                        window['Div' + elNum].style.borderStyle = "dashed";
+                        window['Div' + elNum].style.overflow = "hidden";
+                        window['Div' + elNum].style.backgroundColor = "#ffffff";
+                        window['Div' + elNum].style.zIndex = 99;
+                        workspace.appendChild(window['Div' + elNum]);
+                    }
+                    //随鼠标移动改变参考框大小
+                    workspace.onmousemove = function (event) {
+                        drawclock = false;
+                        if (brush == "rectangle") {
+                            // 判断是否会超界
+                            if (preX + 170 + parseInt(window['Div' + elNum].style.width.slice(0, -2)) + event.movementX > 170 + parseInt(workspace.style.width.slice(0, -2))) {
+                            } else if (preY + 51 + parseInt(window['Div' + elNum].style.height.slice(0, -2)) + event.movementY > parseInt(workspace.style.height.slice(0, -2))) {
+                            } else {
+                                window['Div' + elNum].style.width = parseInt(window['Div' + elNum].style.width.slice(0, -2)) + event.movementX + 'px';
+                                window['Div' + elNum].style.height = parseInt(window['Div' + elNum].style.height.slice(0, -2)) + event.movementY + 'px';
+                            }
+                        } else if (brush == "line") {
+                            // 判断是否会超界
+                            if (preX + 170 + parseInt(window['Div' + elNum].style.width.slice(0, -2)) + event.movementX > 170 + parseInt(workspace.style.width.slice(0, -2))) {
+                            } else if (preY + 51 + parseInt(window['Div' + elNum].style.height.slice(0, -2)) + event.movementY > parseInt(workspace.style.height.slice(0, -2))) {
+                            } else {
+                                //获取鼠标当前位置记录，作为临时终点
+                                let endX = event.pageX - 170;
+                                let endY = event.pageY - 51;
+                                //计算线段的倾斜角和长度
+                                let slope = 360 * Math.atan((endY - preY) / (endX - preX)) / (2 * Math.PI); //坡度(倾斜角)
+                                let Lleng = Math.sqrt(Math.pow((endX - preX), 2) + Math.pow((endY - preY), 2)); //线段长度
+                                window['Div' + elNum].style.width = Lleng + "px";
+                                window['Div' + elNum].style.transformOrigin = "0 0";
+                                window["Div" + elNum].style.transform = 'rotate(' + slope + 'deg)';
+                            }
+                        }
+                    }
+                }
+            } else if (event.button == 2) {
+                //右键单击弹出菜单，包含删除、复制、剪切等功能
+                //右键拖动移动整张画
+                workspace.addEventListener("mousemove", rightButtonMove, false);
+            }
+
+        }
+
+        function up(e) {
+            if (e.button == 0) {
+                RightClickMenu.style.display = 'none';
+                if (mode == "choose") {
+                    //停止选取，选中目标
+
+                    //（单元素）停止拖动元素
+                    if (ismoving == true) {
+                        workspace.onmousemove = null;
+                        relationtree["Div" + currentCompId.slice(9,)].top = document.getElementById(currentCompId).style.top;
+                        relationtree["Div" + currentCompId.slice(9,)].left = document.getElementById(currentCompId).style.left;
+                        ismoving = false;
+                    }
+                } else {
+                    //停止绘制行为
+                    workspace.onmousemove = null;
+                    drawclock = true;
+                    //化虚为实
+                    window['Div' + elNum].style.borderStyle = 'solid';
+                    //将新元素就近加入下方元素的子节点
+                    mother.appendChild(window['Div' + elNum]);
+                    //修改相对位置
+                    let p = mother;
+                    let level = 1;
+                    while (p != workspace) {
+                        window['Div' + elNum].style.left = parseInt(window['Div' + elNum].style.left.slice(0, -2)) - p.offsetLeft + 'px';
+                        window['Div' + elNum].style.top = parseInt(window['Div' + elNum].style.top.slice(0, -2)) - p.offsetTop + 'px';
+                        window['Div' + elNum].style.zIndex = mother.style.zIndex;
+                        p = p.parentElement;
+                        level++;
+                    }
+                    //重构侧边栏标签树
+                    let divname; //div名字属性
+                    let cate;//div类型
+                    if (brush == "rectangle") {
+                        divname = "组件" + elNum;
+                        cate = "rectangle";
+                    } else {
+                        divname = "直线" + elNum;
+                        category = "line";
+                    }
+                    if (mother == workspace) {
+                        //修改元素zIndex
+                        window['Div' + elNum].style.zIndex = 1;
+                        //向储存数组添加此元素信息
+                        relationtree["Div" + elNum] = {
+                            name: divname,
+                            level: level,
+                            mother: "workspace",
+                            id: 'component' + elNum,
+                            category: cate,
+                            width: window['Div' + elNum].style.width,
+                            height: window['Div' + elNum].style.height,
+                            left: preX + "px",
+                            top: preY + "px",
+                            backgroundColor: "#ffffff",
+                            borderColor: "#000000",
+                            borderStyle: 'solid',
+                            borderWidth: '1px',
+                            borderRadius: '0px',
+                            zIndex: 1,
+                            child: []
+                        }
+                        //设为编辑栏选中元素
+                        currentComp = relationtree['Div' + elNum];
+                        currentCompId = "component" + elNum;
+                        edt.target = currentComp;
+                        //让被选中元素可以通过鼠标拖动边框resize
+                        e.target.onmousemove = function (e) {
+                            if (relationtree["Div" + this.id.slice(9,)].category == "rectangle") {//对矩形
+                                let bw = this.style.borderWidth;
+                                let ex = this.style.left;
+                                let ey = this.style.top;
+                                let ew = this.style.width;
+                                let eh = this.style.height;
+                                if (mode == "choose" && this.id == currentCompId) {
+                                    if (Math.abs(e.offsetX - e.offsetY) < 2 && 0 < e.offsetX && e.offsetX <= 4) {
+                                        //鼠标在左上角
+                                        this.style.cursor = "se-resize";
+                                        let _this = this;
+                                        this.onmousedown = function (e) {
+                                            e.stopPropagation();//阻止上层元素事件
+                                            function resizeMoveHandle(movee) {
+                                                //resize操作
+                                                _this.style.top = parseInt(_this.style.top.slice(0, -2)) + movee.movementY + "px";
+                                                _this.style.left = parseInt(_this.style.left.slice(0, -2)) + movee.movementX + "px";
+                                                _this.style.width = parseInt(_this.style.width.slice(0, -2)) - movee.movementX + "px";
+                                                _this.style.height = parseInt(_this.style.height.slice(0, -2)) - movee.movementY + "px";
+                                                //更改记录数组
+                                                relationtree["Div" + _this.id.slice(9,)].top = _this.style.top;
+                                                relationtree["Div" + _this.id.slice(9,)].left = _this.style.left;
+                                                relationtree["Div" + _this.id.slice(9,)].width = _this.style.width;
+                                                relationtree["Div" + _this.id.slice(9,)].height = _this.style.height;
+                                            }
+                                            workspace.addEventListener("mousemove", resizeMoveHandle, false);
+                                            function resizeUpHandle() {
+                                                workspace.removeEventListener("mousemove", resizeMoveHandle);
+                                            }
+                                            workspace.addEventListener("mouseup", resizeUpHandle);
+                                        }
+                                    } else if (0 < e.offsetY && e.offsetY <= 4 && Math.abs(parseInt(ew.slice(0, -2)) - e.offsetX - e.offsetY) < 2) {
+                                        //鼠标在右上角
+                                        this.style.cursor = "sw-resize";
+                                        let _this = this;
+                                        this.onmousedown = function (e) {
+                                            e.stopPropagation();//阻止上层元素事件
+                                            function resizeMoveHandle(movee) {
+                                                //resize操作
+                                                _this.style.top = parseInt(_this.style.top.slice(0, -2)) + movee.movementY + "px";
+                                                _this.style.width = parseInt(_this.style.width.slice(0, -2)) + movee.movementX + "px";
+                                                _this.style.height = parseInt(_this.style.height.slice(0, -2)) - movee.movementY + "px";
+                                                //更改记录数组
+                                                relationtree["Div" + _this.id.slice(9,)].top = _this.style.top;
+                                                relationtree["Div" + _this.id.slice(9,)].width = _this.style.width;
+                                                relationtree["Div" + _this.id.slice(9,)].height = _this.style.height;
+                                            }
+                                            workspace.addEventListener("mousemove", resizeMoveHandle, false);
+                                            function resizeUpHandle() {
+                                                workspace.removeEventListener("mousemove", resizeMoveHandle);
+                                            }
+                                            workspace.addEventListener("mouseup", resizeUpHandle);
+                                        }
+                                    } else if (0 < (parseInt(ew.slice(0, -2)) - e.offsetX) && (parseInt(ew.slice(0, -2)) - e.offsetX) <= 4 && Math.abs(e.offsetX - e.offsetY - (parseInt(ew.slice(0, -2)) - parseInt(eh.slice(0, -2)))) < 2) {
+                                        //鼠标在右下角
+                                        this.style.cursor = "se-resize";
+                                        let _this = this;
+                                        this.onmousedown = function (e) {
+                                            e.stopPropagation();//阻止上层元素事件
+                                            function resizeMoveHandle(movee) {
+                                                //resize操作
+                                                _this.style.width = parseInt(_this.style.width.slice(0, -2)) + movee.movementX + "px";
+                                                _this.style.height = parseInt(_this.style.height.slice(0, -2)) + movee.movementY + "px";
+                                                //更改记录数组
+                                                relationtree["Div" + _this.id.slice(9,)].width = _this.style.width;
+                                                relationtree["Div" + _this.id.slice(9,)].height = _this.style.height;
+                                            }
+                                            workspace.addEventListener("mousemove", resizeMoveHandle, false);
+                                            function resizeUpHandle() {
+                                                workspace.removeEventListener("mousemove", resizeMoveHandle);
+                                            }
+                                            workspace.addEventListener("mouseup", resizeUpHandle);
+                                        }
+                                    } else if (0 < e.offsetX && e.offsetX <= 4 && Math.abs(parseInt(eh.slice(0, -2)) - e.offsetY - e.offsetX) < 2) {
+                                        //鼠标在左下角
+                                        this.style.cursor = "sw-resize";
+                                        let _this = this;
+                                        this.onmousedown = function (e) {
+                                            e.stopPropagation();//阻止上层元素事件
+                                            function resizeMoveHandle(movee) {
+                                                //resize操作
+                                                _this.style.left = parseInt(_this.style.left.slice(0, -2)) + movee.movementX + "px";
+                                                _this.style.width = parseInt(_this.style.width.slice(0, -2)) - movee.movementX + "px";
+                                                _this.style.height = parseInt(_this.style.height.slice(0, -2)) + movee.movementY + "px";
+                                                //更改记录数组
+                                                relationtree["Div" + _this.id.slice(9,)].left = _this.style.left;
+                                                relationtree["Div" + _this.id.slice(9,)].width = _this.style.width;
+                                                relationtree["Div" + _this.id.slice(9,)].height = _this.style.height;
+                                            }
+                                            workspace.addEventListener("mousemove", resizeMoveHandle, false);
+                                            function resizeUpHandle() {
+                                                workspace.removeEventListener("mousemove", resizeMoveHandle);
+                                            }
+                                            workspace.addEventListener("mouseup", resizeUpHandle);
+                                        }
+                                    } else {
+                                        this.style.cursor = "default";
+                                        this.onmousedown = null;
+                                    }
+                                }
+
+                            } else if (relationtree["Div" + this.id.slice(9,)].category == "line") {//对直线
+                                //
+                            } else {//对其他，待补充
+                                //
+                            }
+                        }
+                        //在侧边栏添加此元素
+                        window["component" + elNum] = document.createElement("div");
+                        window["component" + elNum].classList.add("leaf");
+                        window["component" + elNum].style.display = "flex";
+                        let barlevel = document.createElement("div");
+                        barlevel.style.height = '18px';
+                        barlevel.style.width = '18px';
+                        barlevel.style.borderRadius = '9px';
+                        barlevel.style.borderStyle = "solid";
+                        barlevel.style.borderWidth = '1px';
+                        barlevel.style.borderColor = "#666666";
+                        barlevel.style.display = "flex";
+                        barlevel.style.alignItems = "center";
+                        barlevel.style.justifyContent = "center";
+                        barlevel.style.marginLeft = level * 10 + "px";
+                        barlevel.innerHTML = "<p>" + level + "</p>";
+                        window["component" + elNum].appendChild(barlevel);
+                        window["component" + elNum].innerHTML = window["component" + elNum].innerHTML + "<p style='margin-left:20px'>" + window["Div" + elNum].name + "<p>";
+                        let zCtrl = document.createElement("div");
+                        zCtrl.style.display = "flex";
+                        zCtrl.style.flexDirection = "row";
+                        let zModifier = document.createElement('div');
+                        zModifier.classList.add('zModifier');
+                        let upButton = document.createElement("div");
+                        upButton.classList.add('upButton');
+                        upButton.innerHTML = "<p>v</p>";
+                        upButton.addEventListener("click", function (e) {
+                            e = e || window.event;
+                            console.log(e)
+                        }, false)
+                        zModifier.appendChild(upButton);
+                        let reduceButton = document.createElement("div");
+                        reduceButton.classList.add('reduceButton');
+                        reduceButton.innerHTML = "<p>v</p>";
+                        reduceButton.addEventListener('click', function (e) {
+                            e = e || window.event;
+                        });
+                        zModifier.appendChild(reduceButton);
+                        zCtrl.appendChild(zModifier);
+                        zCtrl.innerHTML = zCtrl.innerHTML + "<textarea id='zctrl" + elNum + "' wrap='off' maxLength='2' style='width:20px;height:20px;resize:none;overflow:hidden;'>" + window["Div" + elNum].style.zIndex + "</textarea>";
+                        zCtrl.style.position = "absolute";
+                        zCtrl.style.right = "15px";
+                        window["component" + elNum].appendChild(zCtrl);
+                        sidebar.appendChild(window["component" + elNum]);
+                        document.getElementById("zctrl" + elNum).addEventListener('change', function (e) {
+                            //监听到z值被修改，改变对应元素z值并修改存储在关系数组中的值
+                            window["Div" + e.target.id.slice(5,)].style.zIndex = e.target.value;
+                            relationtree['Div' + e.target.id.slice(5,)].zIndex = e.target.value;
+                            console.log(window["Div" + e.target.id.slice(5,)].style.zIndex, e.target.value)
+                        })
+                    } else {
+                        window['Div' + elNum].style.zIndex = parseInt(mother.style.zIndex) + 1;
+                        //向储存数组添加此元素信息
+                        relationtree["Div" + elNum] = {
+                            name: divname,
+                            level: level,
+                            mother: "Div" + mother.id.slice(9,),
+                            id: 'component' + elNum,
+                            width: window['Div' + elNum].style.width,
+                            height: window['Div' + elNum].style.height,
+                            left: preX + "px",
+                            top: preY + "px",
+                            backgroundColor: "#ffffff",
+                            borderColor: "#000000",
+                            borderStyle: 'solid',
+                            borderWidth: '1px',
+                            borderRadius: '0px',
+                            zIndex: parseInt(window['Div' + elNum].style.zIndex),
+                            child: []
+                        }
+                        relationtree["Div" + mother.id.slice(9,)].child.push("Div" + elNum);
+                        //设为编辑栏选中元素
+                        currentComp = relationtree['Div' + elNum];
+                        currentCompId = 'component' + elNum;
+                        edt.target = currentComp;
+                        //在侧边栏对应的母亲标签下方按顺序添加入此元素
+                        let mothertag = window["component" + mother.id.slice(9,)];
+                        if (relationtree['Div' + mother.id.slice(9,)].child.length == 1) {
+                            //当母标签下方没有其他子标签,直接添加此子标签
+                            window["component" + elNum] = document.createElement("div");
+                            window["component" + elNum].classList.add("leaf");
+                            window["component" + elNum].style.display = "flex";
+                            let barlevel = document.createElement("div");
+                            barlevel.style.height = '18px';
+                            barlevel.style.width = '18px';
+                            barlevel.style.borderRadius = '9px';
+                            barlevel.style.borderStyle = "solid";
+                            barlevel.style.borderWidth = '1px';
+                            barlevel.style.borderColor = "#666666";
+                            barlevel.style.display = "flex";
+                            barlevel.style.alignItems = "center";
+                            barlevel.style.justifyContent = "center";
+                            barlevel.style.marginLeft = level * 10 + "px";
+                            barlevel.innerHTML = "<p>" + level + "</p>";
+                            window["component" + elNum].appendChild(barlevel);
+                            window["component" + elNum].innerHTML = window["component" + elNum].innerHTML + "<p style='margin-left:20px'>" + window["Div" + elNum].name + "<p>";
+                            let zCtrl = document.createElement("div");
+                            zCtrl.style.display = "flex";
+                            zCtrl.style.flexDirection = "row";
+                            let zModifier = document.createElement('div');
+                            zModifier.classList.add('zModifier');
+                            let upButton = document.createElement("div");
+                            upButton.classList.add('upButton');
+                            upButton.innerHTML = "<p>v</p>";
+                            upButton.addEventListener("click", function (e) {
+                                e = e || window.event;
+                                console.log(e)
+                            }, false)
+                            zModifier.appendChild(upButton);
+                            let reduceButton = document.createElement("div");
+                            reduceButton.classList.add('reduceButton');
+                            reduceButton.innerHTML = "<p>v</p>";
+                            reduceButton.addEventListener('click', function (e) {
+                                e = e || window.event;
+                            });
+                            zModifier.appendChild(reduceButton);
+                            zCtrl.appendChild(zModifier);
+                            zCtrl.innerHTML = zCtrl.innerHTML + "<textarea id='zctrl" + elNum + "' wrap='off' maxLength='2' style='width:20px;height:20px;resize:none;overflow:hidden;'>" + window["Div" + elNum].style.zIndex + "</textarea>";
+                            zCtrl.style.position = "absolute";
+                            zCtrl.style.right = "15px";
+                            window["component" + elNum].appendChild(zCtrl);
+                            insertAfter(window["component" + elNum], window["component" + mother.id.slice(9,)]);
+                            document.getElementById("zctrl" + elNum).addEventListener('change', function (e) {
+                                //监听到z值被修改，改变对应元素z值并修改存储在关系数组中的值
+                                window["Div" + e.target.id.slice(5,)].style.zIndex = e.target.value;
+                                relationtree['Div' + e.target.id.slice(5,)].zIndex = e.target.value;
+                            })
+                        } else {
+                            //当母标签下方已有子标签，插入到最后一个子标签的下方
+                            window["component" + elNum] = document.createElement("div");
+                            window["component" + elNum].classList.add("leaf");
+                            window["component" + elNum].style.display = "flex";
+                            let barlevel = document.createElement("div");
+                            barlevel.style.height = '18px';
+                            barlevel.style.width = '18px';
+                            barlevel.style.borderRadius = '9px';
+                            barlevel.style.borderStyle = "solid";
+                            barlevel.style.borderWidth = '1px';
+                            barlevel.style.borderColor = "#666666";
+                            barlevel.style.display = "flex";
+                            barlevel.style.alignItems = "center";
+                            barlevel.style.justifyContent = "center";
+                            barlevel.style.marginLeft = level * 10 + "px";
+                            barlevel.innerHTML = "<p>" + level + "</p>";
+                            window["component" + elNum].appendChild(barlevel);
+                            window["component" + elNum].innerHTML = window["component" + elNum].innerHTML + "<p style='margin-left:20px'>" + window["Div" + elNum].name + "<p>";
+                            let zCtrl = document.createElement("div");
+                            zCtrl.style.display = "flex";
+                            zCtrl.style.flexDirection = "row";
+                            let zModifier = document.createElement('div');
+                            zModifier.classList.add('zModifier');
+                            let upButton = document.createElement("div");
+                            upButton.classList.add('upButton');
+                            upButton.innerHTML = "<p>v</p>";
+                            upButton.addEventListener("click", function (e) {
+                                e = e || window.event;
+                                console.log(e)
+                            }, false)
+                            zModifier.appendChild(upButton);
+                            let reduceButton = document.createElement("div");
+                            reduceButton.classList.add('reduceButton');
+                            reduceButton.innerHTML = "<p>v</p>";
+                            reduceButton.addEventListener('click', function (e) {
+                                e = e || window.event;
+                            });
+                            zModifier.appendChild(reduceButton);
+                            zCtrl.appendChild(zModifier);
+                            zCtrl.innerHTML = zCtrl.innerHTML + "<textarea id='zctrl" + elNum + "' wrap='off' maxLength='2' style='width:20px;height:20px;resize:none;overflow:hidden;'>" + window["Div" + elNum].style.zIndex + "</textarea>";
+                            zCtrl.style.position = "absolute";
+                            zCtrl.style.right = "15px";
+                            window["component" + elNum].appendChild(zCtrl);
+                            let brotherP = relationtree["Div" + mother.id.slice(9,)].child.length - 2;
+                            let brother = relationtree["Div" + mother.id.slice(9,)].child[brotherP];
+                            insertAfter(window["component" + elNum], window["component" + relationtree[brother].id.slice(9,)]);
+                            document.getElementById("zctrl" + elNum).addEventListener('change', function (e) {
+                                //监听到z值被修改，改变对应元素z值并修改存储在关系数组中的值
+                                window["Div" + e.target.id.slice(5,)].style.zIndex = e.target.value;
+                                relationtree['Div' + e.target.id.slice(5,)].zIndex = e.target.value;
+                            })
+                        }
+                    }
+                    // console.log(relationtree);
+                }
+            } else if (e.button == 2) {
+                //右键单击弹出菜单，包含删除、复制、剪切等功能
+                if (isRightClick == true) {
+                    //重定位右键菜单的位置
+                    let target = e.target;
+                    RightClickMenu.style.display = "flex";
+                    RightClickMenu.style.position = 'absolute'
+                    RightClickMenu.style.left = e.offsetX + "px";
+                    RightClickMenu.style.top = e.offsetY + 'px';
+                }
+                workspace.removeEventListener("mousemove", rightButtonMove);
+                isRightClick = true;
+            }
+        }
+
+    </script>
+
+    <!-- <script>
+        var file;
+        var a = $.ajax({
+            url: "json/test.json",
+            type: "GET",
+            dataType: "json",
+            async: false,
+            success: function (data) {
+                //请求完成后执行的方法
+                file = data;
+            }
+        })
+        console.log(file[1]);
+    </script> -->
+</body>
+
+</html>
